@@ -1,30 +1,43 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 void main() {
-  runApp(Image());
+  runApp(Image_widget());
 }
 
-class Image extends StatefulWidget {
-  const Image({super.key});
+class Image_widget extends StatefulWidget {
+  const Image_widget({super.key});
 
   @override
-  State<Image> createState() => _ImageState();
+  State<Image_widget> createState() => _Image_widgetState();
 }
 
-class _ImageState extends State<Image> {
-  final ImagePicker _picker = ImagePicker();
+class _Image_widgetState extends State<Image_widget> {
+  File? ImageFile;
 
-  Future TakePicture() async {
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+  Future<XFile?> TakePicture() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+
     return photo;
   }
 
-  Future PickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    return image;
+  Future<void> PickImage() async {
+    final ImagePicker picker = ImagePicker();
+
+    final imageData = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (imageData != null) {
+        print(imageData.path.toString());
+        ImageFile = File(imageData.path);
+      } else {
+        print("not Image");
+      }
+    });
   }
 
   @override
@@ -44,11 +57,21 @@ class _ImageState extends State<Image> {
             child: Text("take picture"),
           ),
           ElevatedButton(
-            onPressed: () {
-              PickImage();
+            onPressed: () async {
+              await PickImage();
             },
-            child: Text("pick image"),
+            child: Text("pick Image"),
           ),
+          Center(
+            child: ImageFile == null
+                ? const Text("not found Image")
+                : Image.file(
+                    ImageFile!,
+                    height: 300,
+                    width: 300,
+                    fit: BoxFit.cover,
+                  ),
+          )
         ],
       ),
     );
